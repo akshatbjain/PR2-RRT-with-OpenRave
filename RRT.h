@@ -64,10 +64,12 @@ public:
 
 };
 
+int biDirectional;
+std::vector<float> start_config, goal_config;
+float goal_bias, joint_weights[7];
 std::vector<float> lower_joint_limits, upper_joint_limits;
-void getJointLimits(std::vector<float> lower, std::vector<float> upper);
 std::vector<float> random_sample();
-
+void init_Tree();
 
 
 #endif

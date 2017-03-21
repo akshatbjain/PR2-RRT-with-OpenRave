@@ -31,21 +31,26 @@ public:
         // RRTConnect goal goal_bias weights
         std::string input; // Variable to read incoming stream of characters
 
-        int biDirectional;
-        std::vector<float> config, lower_limit, upper_limit;
-        float goal_bias, weights[7]; // Variables for goal_bias and weights
-
         sout << "\nBidirectional: ";
         sinput >> biDirectional;
         sout << biDirectional;
+
+        sout << "\nStart configuration: ";
+        for(int i = 0; i<7; i++)
+        {
+            sinput >> input;
+            input.erase(std::remove(input.begin(), input.end(), ','), input.end());
+            start_config.push_back(strtof(input.c_str(),0));
+            sout << start_config[i] << " ";
+        }
 
         sout << "\nGoal configuration: ";
         for(int i = 0; i<7; i++)
         {
             sinput >> input;
             input.erase(std::remove(input.begin(), input.end(), ','), input.end());
-            config.push_back(strtof(input.c_str(),0));
-            sout << config[i] << " ";
+            goal_config.push_back(strtof(input.c_str(),0));
+            sout << goal_config[i] << " ";
         }
 
         sout << "\nGoal bias: ";
@@ -58,8 +63,8 @@ public:
         {
             sinput >> input;
             input.erase(std::remove(input.begin(), input.end(), ','), input.end());
-            weights[i] = strtof(input.c_str(),0);
-            sout << weights[i] << " ";
+            joint_weights[i] = strtof(input.c_str(),0);
+            sout << joint_weights[i] << " ";
 
         }
 
@@ -72,18 +77,16 @@ public:
                 sout << "\n";
             if(i<7)
             {
-                lower_limit.push_back(strtof(input.c_str(),0));
-                sout << lower_limit[i] << " ";
+                lower_joint_limits.push_back(strtof(input.c_str(),0));
+                sout << lower_joint_limits[i] << " ";
             }
             else
             {
-                upper_limit.push_back(strtof(input.c_str(),0));
-                sout << upper_limit[i-7] << " ";
+                upper_joint_limits.push_back(strtof(input.c_str(),0));
+                sout << upper_joint_limits[i-7] << " ";
             }
 
         }
-
-        getJointLimits(lower_limit, upper_limit);
 
         sout << "\nRandom Sample: \n";
         std::vector<float> q_rand = random_sample();

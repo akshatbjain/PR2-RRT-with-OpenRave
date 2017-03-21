@@ -65,6 +65,9 @@ if __name__ == "__main__":
         biDirectional = 0
         command = "RRTConnect " + str(biDirectional) + " "
 
+        startconfig = repr(startconfig).strip('[').strip(']')
+        command = command + startconfig + " "
+
         goalconfig = repr(goalconfig).strip('[').strip(']')
         command = command + goalconfig + " "
 

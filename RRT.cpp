@@ -104,12 +104,6 @@ RRTNode NodeTree::find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<f
     return tree[node_index];
 }
 
-void getJointLimits(std::vector<float> lower, std::vector<float> upper)
-{
-    lower_joint_limits = lower;
-    upper_joint_limits = upper;
-}
-
 std::vector<float> random_sample()
 {
     std::vector<float> q_rand;
