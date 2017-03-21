@@ -16,6 +16,7 @@
 // included dependencies
 #include <vector>
 #include <cstring> // Includes NULL
+#include <math.h>
 
 // Classes defined in this header file
 
@@ -42,14 +43,23 @@ public:
 
 class NodeTree
 {
-    std::vector<RRTNode*> _nodes;
+    std::vector<RRTNode> _nodes;
+    std::vector<float> DOFWeights;
 
 public:
-    void addNodes(std::vector<float> node_values, RRTNode* parents);
-    void deleteNodes();
-    std::vector<RRTNode*> getNodes();
-    std::vector<RRTNode*> path();
-    RRTNode* find_nearest_neighbor(std::vector<float> tree);
+    // Constructor
+    NodeTree();
+
+    // Destructor
+    ~NodeTree();
+
+    //Functions
+    void addNode(RRTNode node);
+    void deleteNode(int node_index);
+    std::vector<RRTNode> getNodes();
+    std::vector<RRTNode> path();
+    float euclidean_distance(std::vector<float> A, std::vector<float> B);
+    RRTNode find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<float> q_random);
 };
 
 #endif
