@@ -38,7 +38,8 @@ if __name__ == "__main__":
     # 2) assign it to the variable named 'robot'
     robot = env.GetRobots()[0]
     ### INITIALIZE YOUR PLUGIN HERE ###
-
+    RaveInitialize()
+    RaveLoadPlugin('build/rrtplugin')
     ### END INITIALIZING YOUR PLUGIN ###
 
 
@@ -58,7 +59,25 @@ if __name__ == "__main__":
 
         ### YOUR CODE HERE ###
         ###call your plugin to plan, draw, and execute a path from the current configuration of the left arm to the goalconfig
-            
+        goalconfig = repr(goalconfig).strip('[').strip(']')
+        command = "RRTConnect " + goalconfig + " "
+
+        goal_bias = 0.1
+        goal_bias = repr(goal_bias)
+        command = command + goal_bias + " "
+
+        lmodel = databases.linkstatistics.LinkStatisticsModel(robot)
+        if not lmodel.load():
+            lmodel.autogenerate()
+        lmodel.setRobotWeights()
+        lmodel.setRobotResolutions(xyzdelta=0.01)
+        I = [robot.GetJoint(name).GetDOFIndex() for name in jointnames]
+        weights = repr(list(robot.GetDOFWeights(I))).strip('[').strip(']')
+        command = command + weights + " "
+
+        print command
+        rrtmodule = RaveCreateModule(env,'rrtmodule')
+        print rrtmodule.SendCommand(command)
         ### END OF YOUR CODE ###
     waitrobot(robot)
 
