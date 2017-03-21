@@ -1,7 +1,7 @@
 #include <openrave/plugin.h>
 #include <boost/bind.hpp>
 #include <vector>
-#include "RRT.h"
+#include "RRT.cpp"
 
 using namespace OpenRAVE;
 
@@ -77,6 +77,15 @@ public:
                 sout << upper_limit[i-7] << " ";
             }
 
+        }
+
+        getJointLimits(lower_limit, upper_limit);
+
+        sout << "\nRandom Sample: \n";
+        std::vector<float> q_rand = random_sample();
+        for(int i = 0; i<7; i++)
+        {
+            sout << q_rand[i] << " ";
         }
 
         return true;

@@ -161,6 +161,9 @@ OpenRAVE_DIR:PATH=/usr/local/lib/cmake/openrave-0.9
 //the suffix for the openrave libraries
 OpenRAVE_LIBRARY_SUFFIX:STRING=0.9
 
+//Dependencies for target
+RRT_LIB_DEPENDS:STATIC=
+
 //Value Computed by CMake
 rrtplugin_BINARY_DIR:STATIC=/media/akshat/Akshat/WPI/Courses/Motion Planning/Homework/HW3/rrtplugin/build
 

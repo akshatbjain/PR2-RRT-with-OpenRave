@@ -20,16 +20,6 @@ math.h
 openrave/plugin.h
 -
 
-/media/akshat/Akshat/WPI/Courses/Motion Planning/Homework/HW3/rrtplugin/rrtplugin.cpp
-openrave/plugin.h
--
-boost/bind.hpp
--
-vector
--
-RRT.cpp
-/media/akshat/Akshat/WPI/Courses/Motion Planning/Homework/HW3/rrtplugin/RRT.cpp
-
 /usr/local/include/openrave-0.9/openrave/collisionchecker.h
 
 /usr/local/include/openrave-0.9/openrave/config.h

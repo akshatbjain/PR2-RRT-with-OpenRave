@@ -91,7 +91,7 @@ RRTNode NodeTree::find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<f
     float distance, minimum_distance = -1;
     int node_index;
 
-    for(int i = 0; i<tree.size(); i++)
+    for(int i = 0; i<int(tree.size()); i++)
     {
         distance = euclidean_distance(tree[i].getConfiguration(), q_random);
         if(distance < minimum_distance || minimum_distance == -1)
@@ -102,4 +102,20 @@ RRTNode NodeTree::find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<f
     }
 
     return tree[node_index];
+}
+
+void getJointLimits(std::vector<float> lower, std::vector<float> upper)
+{
+    lower_joint_limits = lower;
+    upper_joint_limits = upper;
+}
+
+std::vector<float> random_sample()
+{
+    std::vector<float> q_rand;
+    for(int i=0; i<7; i++)
+    {
+        q_rand.push_back(lower_joint_limits[i] + static_cast<float> (rand()) / (static_cast<float> (RAND_MAX/(upper_joint_limits[i] - lower_joint_limits[i]))));
+    }
+    return q_rand;
 }

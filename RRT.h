@@ -17,6 +17,7 @@
 #include <vector>
 #include <cstring> // Includes NULL
 #include <math.h>
+#include <openrave/plugin.h>
 
 // Classes defined in this header file
 
@@ -60,6 +61,13 @@ public:
     std::vector<RRTNode> path();
     float euclidean_distance(std::vector<float> A, std::vector<float> B);
     RRTNode find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<float> q_random);
+
 };
+
+std::vector<float> lower_joint_limits, upper_joint_limits;
+void getJointLimits(std::vector<float> lower, std::vector<float> upper);
+std::vector<float> random_sample();
+
+
 
 #endif
