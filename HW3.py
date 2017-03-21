@@ -75,6 +75,13 @@ if __name__ == "__main__":
         weights = repr(list(robot.GetDOFWeights(I))).strip('[').strip(']')
         command = command + weights + " "
 
+        lower, upper = robot.GetActiveDOFLimits()
+        lower[4], lower[6] = -pi, -pi
+        upper[4], upper[6] = pi, pi
+        lower = repr(list(lower)).strip('[').strip(']')
+        upper = repr(list(upper)).strip('[').strip(']')
+        command = command + lower + " " + upper + " "
+
         rrtmodule = RaveCreateModule(env,'rrtmodule')
         print rrtmodule.SendCommand(command)
         ### END OF YOUR CODE ###
