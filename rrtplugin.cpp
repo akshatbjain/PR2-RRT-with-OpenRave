@@ -1,5 +1,8 @@
 #include <openrave/plugin.h>
 #include <boost/bind.hpp>
+#include <vector>
+#include "RRT.h"
+
 using namespace OpenRAVE;
 
 class rrtmodule : public ModuleBase
@@ -8,6 +11,8 @@ public:
     rrtmodule(EnvironmentBasePtr penv, std::istream& ss) : ModuleBase(penv) {
         RegisterCommand("MyCommand",boost::bind(&rrtmodule::MyCommand,this,_1,_2),
                         "This is an example command");
+    RegisterCommand("RRTConnect", boost::bind(&rrtmodule::RRTConnect,this,_1,_2),
+            "This command sends info from python to c++");
     }
     virtual ~rrtmodule() {}
     
@@ -16,6 +21,44 @@ public:
         std::string input;
         sinput >> input;
         sout << "output";
+        return true;
+    }
+
+    bool RRTConnect(std::ostream& sout, std::istream& sinput)
+    {
+        // Format in which command is received:
+        // RRTConnect goal goal_bias weights
+        std::string input; // Variable to read incoming stream of characters
+
+        std::vector<float> config;
+        float goal_bias, weights[7]; // Variables for goal_bias and weights
+
+        sout << "\nGoal configuration: ";
+        for(int i = 0; i<7; i++)
+        {
+            sinput >> input;
+            input.erase(std::remove(input.begin(), input.end(), ','), input.end());
+            config.push_back(strtof(input.c_str(),0));
+            sout << config[i] << " ";
+        }
+
+        //goal._configuration = config;
+
+        sout << "\nGoal bias: ";
+        sinput >> input;
+        goal_bias = strtof(input.c_str(),0);
+        sout << goal_bias;
+
+        sout << "\nWeights: ";
+        for(int i = 0; i<7; i++)
+        {
+            sinput >> input;
+            input.erase(std::remove(input.begin(), input.end(), ','), input.end());
+            weights[i] = strtof(input.c_str(),0);
+            sout << weights[i] << " ";
+
+        }
+
         return true;
     }
 };

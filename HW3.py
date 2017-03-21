@@ -75,7 +75,6 @@ if __name__ == "__main__":
         weights = repr(list(robot.GetDOFWeights(I))).strip('[').strip(']')
         command = command + weights + " "
 
-        print command
         rrtmodule = RaveCreateModule(env,'rrtmodule')
         print rrtmodule.SendCommand(command)
         ### END OF YOUR CODE ###
