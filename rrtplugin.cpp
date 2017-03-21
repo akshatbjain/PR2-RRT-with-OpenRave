@@ -30,7 +30,7 @@ public:
         // RRTConnect goal goal_bias weights
         std::string input; // Variable to read incoming stream of characters
 
-        std::vector<float> config;
+        std::vector<float> config, lower_limit, upper_limit;
         float goal_bias, weights[7]; // Variables for goal_bias and weights
 
         sout << "\nGoal configuration: ";
@@ -56,6 +56,26 @@ public:
             input.erase(std::remove(input.begin(), input.end(), ','), input.end());
             weights[i] = strtof(input.c_str(),0);
             sout << weights[i] << " ";
+
+        }
+
+        sout << "\nLower and Upper Joint Limits: \n";
+        for(int i = 0; i<14; i++)
+        {
+            sinput >> input;
+            input.erase(std::remove(input.begin(), input.end(), ','), input.end());
+            if(i==7)
+                sout << "\n";
+            if(i<7)
+            {
+                lower_limit.push_back(strtof(input.c_str(),0));
+                sout << lower_limit[i] << " ";
+            }
+            else
+            {
+                upper_limit.push_back(strtof(input.c_str(),0));
+                sout << upper_limit[i-7] << " ";
+            }
 
         }
 
