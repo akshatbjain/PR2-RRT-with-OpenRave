@@ -1,6 +1,7 @@
 #include <openrave/plugin.h>
 #include <boost/bind.hpp>
 #include <vector>
+#include <string>
 #include "RRT.cpp"
 
 using namespace OpenRAVE;
@@ -30,8 +31,13 @@ public:
         // RRTConnect goal goal_bias weights
         std::string input; // Variable to read incoming stream of characters
 
+        int biDirectional;
         std::vector<float> config, lower_limit, upper_limit;
         float goal_bias, weights[7]; // Variables for goal_bias and weights
+
+        sout << "\nBidirectional: ";
+        sinput >> biDirectional;
+        sout << biDirectional;
 
         sout << "\nGoal configuration: ";
         for(int i = 0; i<7; i++)
@@ -41,8 +47,6 @@ public:
             config.push_back(strtof(input.c_str(),0));
             sout << config[i] << " ";
         }
-
-        //goal._configuration = config;
 
         sout << "\nGoal bias: ";
         sinput >> input;

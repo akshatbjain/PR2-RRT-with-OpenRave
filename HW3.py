@@ -59,8 +59,14 @@ if __name__ == "__main__":
 
         ### YOUR CODE HERE ###
         ###call your plugin to plan, draw, and execute a path from the current configuration of the left arm to the goalconfig
+        # biDirectional decides whether to implement RRTConnect or biDirectional RRTConnect
+        # Pass 0 for RRTConnect
+        # Pass 1 for biDirectional RRTConnect
+        biDirectional = 0
+        command = "RRTConnect " + str(biDirectional) + " "
+
         goalconfig = repr(goalconfig).strip('[').strip(']')
-        command = "RRTConnect " + goalconfig + " "
+        command = command + goalconfig + " "
 
         goal_bias = 0.1
         goal_bias = repr(goal_bias)
