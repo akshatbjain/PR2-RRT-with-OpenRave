@@ -96,11 +96,23 @@ if __name__ == "__main__":
         upper = repr(list(upper)).strip('[').strip(']')
         command = command + lower + " " + upper + " "
 
-        print command
         print rrtmodule.SendCommand(command)
+
+        start_time = time.time()
         path = rrtmodule.SendCommand("Start")
-        print "YOLO"
-        print path
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+        path = path.split('\n')
+        for i in xrange(len(path)):
+            path[i] = path[i].split(',')
+            for j in xrange(len(path[i])):
+                path[i][j] = float(path[i][j])
+
+        draw=[]
+        for i in path:
+            robot.SetActiveDOFValues(i)
+            draw.append(env.plot3(points=robot.GetLinks()[49].GetTransform()[0:3,3],pointsize=0.03,colors=[1, 0, 0],drawstyle=1))
+
         ### END OF YOUR CODE ###
     waitrobot(robot)
 
