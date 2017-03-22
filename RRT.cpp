@@ -6,16 +6,16 @@
 
 RRTNode::RRTNode()
 {
-    parent_node = NULL;
+    parent_node = 0;
 }
 
 RRTNode::RRTNode(std::vector<double> configuration)
 {
     _configuration = configuration;
-    parent_node = NULL;
+    parent_node = 0;
 }
 
-RRTNode::RRTNode(std::vector<double> configuration, RRTNode *parent)
+RRTNode::RRTNode(std::vector<double> configuration, int parent)
 {
     _configuration = configuration;
     parent_node = parent;
@@ -24,15 +24,15 @@ RRTNode::RRTNode(std::vector<double> configuration, RRTNode *parent)
 RRTNode::~RRTNode()
 {
     _configuration.clear();
-    parent_node = NULL;
+    parent_node = 0;
 }
 
-void RRTNode::setParent(RRTNode* parent)
+void RRTNode::setParent(int parent)
 {
     parent_node = parent;
 }
 
-RRTNode* RRTNode::getParent()
+int RRTNode::getParent()
 {
     return parent_node;
 }
@@ -152,21 +152,39 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
         {
             temp.push_back(temp1[i] + (step_size*(q[i]-temp1[i])/euclidean_distance(q, temp1)));
         }
-        q_new.setConfiguration(temp);
 
-        if(!check_collision(q_new.getConfiguration(), env_pointer, robot_pointer))
+        if(!check_collision(temp, env_pointer, robot_pointer))
         {
+            print_config(temp);
+            q_new.setConfiguration(temp);
+            q_new.setParent(parent_count++);
             tree->addNode(q_new);
-            temp_node = tree->getLastNode();
-            temp_node.setParent(q_near.getParent());
-            if(q_new.getConfiguration() == q)
+            std::cout<<"\nNew node added DG";
+
+            if(temp == q)
             {
-                reached_goal = 1;
+                if(q == goal_config)
+                    reached_goal = 1;
                 return 0; // Reached
             }
             return 1; // Extend
         }
 
+    }
+    else
+    {
+        if(!check_collision(q, env_pointer, robot_pointer))
+        {
+            print_config(q);
+            q_new.setConfiguration(q);
+            q_new.setParent(parent_count++);
+            tree->addNode(q_new);
+            std::cout<<"\nNew node added DL";
+            if(q == goal_config)
+                reached_goal = 1;
+            return 0;
+
+        }
     }
     return 2; // Trapped
 
@@ -191,13 +209,9 @@ bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
     while((reached_goal == 0) && (i < threshold))
     {
         q_rand = random_sample();
-        for(int j = 0; j<7; j++)
-        {
-            std::cout << q_rand[j] << " ";
-        }
-        std::cout << i;
-        int ext = -1;
-        while(ext != 2)
+        std::cout << "\nNew sample. Loop number: "<< i;
+        int ext = 1;
+        while(ext == 1)
         {
             ext = extend(treeptr,q_rand, env_pointer, robot_pointer);
         }
@@ -211,7 +225,8 @@ bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
     }
 
     std::cout << tree.getNodes().size();
-
+    print_config(tree.getLastNode().getConfiguration());
+    std::vector<double> path = getPath(tree);
     return true;
 
 }
@@ -224,4 +239,15 @@ void print_config(std::vector<double> config)
         std::cout << config[i] << ", ";
     }
     std::cout <<"]";
+}
+
+std::vector<double> getPath(NodeTree tree)
+{
+    std::vector<RRTNode> nodes = tree.getNodes();
+    std::vector<double> path;
+    for(int i = 0; i<nodes.size(); i++)
+    {
+
+    }
+    return path;
 }
