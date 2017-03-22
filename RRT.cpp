@@ -155,11 +155,11 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
 
         if(!check_collision(temp, env_pointer, robot_pointer))
         {
-            print_config(temp);
+            //print_config(temp);
             q_new.setConfiguration(temp);
             q_new.setParent(q_near.getParent() + 1);
             tree->addNode(q_new);
-            std::cout<<"\nNew node added DG";
+            //std::cout<<"\nNew node added DG";
 
             if(temp == q)
             {
@@ -175,11 +175,11 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
     {
         if(!check_collision(q, env_pointer, robot_pointer))
         {
-            print_config(q);
+            //print_config(q);
             q_new.setConfiguration(q);
             q_new.setParent(q_near.getParent() + 1);
             tree->addNode(q_new);
-            std::cout<<"\nNew node added DL";
+            //std::cout<<"\nNew node added DL";
             if(q == goal_config)
                 reached_goal = 1;
             return 0;
@@ -209,13 +209,16 @@ std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_po
     while((reached_goal == 0) && (i < threshold))
     {
         q_rand = random_sample();
-        std::cout << "\nNew sample. Loop number: "<< i;
+        //std::cout << "\nNew sample. Loop number: "<< i;
         int ext = 1;
         while(ext == 1)
         {
             ext = extend(treeptr,q_rand, env_pointer, robot_pointer);
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
+        if(i%100 == 0)
+            std::cout << i << "\n";
+
         i++;
         if(reached_goal == 1)
         {
@@ -225,7 +228,7 @@ std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_po
     }
 
     std::cout << tree.getNodes().size();
-    print_config(tree.getLastNode().getConfiguration());
+    //print_config(tree.getLastNode().getConfiguration());
     std::vector<std::vector<double> > path = getPath(treeptr);
 
 
