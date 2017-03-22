@@ -98,7 +98,9 @@ if __name__ == "__main__":
 
         print command
         print rrtmodule.SendCommand(command)
-        print rrtmodule.SendCommand("Start")
+        path = rrtmodule.SendCommand("Start")
+        print "YOLO"
+        print path
         ### END OF YOUR CODE ###
     waitrobot(robot)
 

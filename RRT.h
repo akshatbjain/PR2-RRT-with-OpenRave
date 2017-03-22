@@ -25,20 +25,20 @@
 class RRTNode
 {
     std::vector<double> _configuration;
-    RRTNode* parent_node;
+    int parent_node;
 
 public:
     // Constructors
     RRTNode();
     RRTNode(std::vector<double> configuration);
-    RRTNode(std::vector<double> configuration, RRTNode* parent);
+    RRTNode(std::vector<double> configuration, int parent);
 
     // Destructor
     ~RRTNode();
 
     //Functions
-    void setParent(RRTNode* parent);
-    RRTNode *getParent();
+    void setParent(int parent);
+    int getParent();
     std::vector<double> getConfiguration();
     void setConfiguration(std::vector<double> config);
 
@@ -64,8 +64,6 @@ public:
 
 };
 
-int parent_count = 0;
-
 bool biDirectional;
 std::vector<double> start_config, goal_config;
 double goal_bias, step_size, joint_weights[7];
@@ -78,9 +76,9 @@ std::vector<double> random_sample();
 bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
 void init_Tree();
 int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
-bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
+std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 void print_config(std::vector<double> config);
 
-std::vector<RRTNode *> getPath(NodeTree* tree);
+std::vector<std::vector<double> > getPath(NodeTree* tree);
 
 #endif

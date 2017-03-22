@@ -105,7 +105,17 @@ public:
 
     bool Start(std::ostream& sout, std::istream& sinput)
     {
-        sout << RRTConnect(GetEnv());
+        std::vector<std::vector<double> > path = RRTConnect(GetEnv());
+        for(int i = 0; i<path.size(); i++)
+        {
+            for(int j = 0; j<7; j++)
+            {
+                sout << path[i][j];
+                if(j<6)
+                    sout << ",";
+            }
+            sout << std::endl;
+        }
         return true;
     }
 };

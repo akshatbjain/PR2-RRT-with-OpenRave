@@ -6,16 +6,16 @@
 
 RRTNode::RRTNode()
 {
-    parent_node = NULL;
+    parent_node = 0;
 }
 
 RRTNode::RRTNode(std::vector<double> configuration)
 {
     _configuration = configuration;
-    parent_node = NULL;
+    parent_node = 0;
 }
 
-RRTNode::RRTNode(std::vector<double> configuration, RRTNode* parent)
+RRTNode::RRTNode(std::vector<double> configuration, int parent)
 {
     _configuration = configuration;
     parent_node = parent;
@@ -24,15 +24,15 @@ RRTNode::RRTNode(std::vector<double> configuration, RRTNode* parent)
 RRTNode::~RRTNode()
 {
     _configuration.clear();
-    parent_node = NULL;
+    parent_node = 0;
 }
 
-void RRTNode::setParent(RRTNode *parent)
+void RRTNode::setParent(int parent)
 {
     parent_node = parent;
 }
 
-RRTNode* RRTNode::getParent()
+int RRTNode::getParent()
 {
     return parent_node;
 }
@@ -157,7 +157,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
         {
             print_config(temp);
             q_new.setConfiguration(temp);
-            q_new.setParent(&q_near);
+            q_new.setParent(q_near.getParent() + 1);
             tree->addNode(q_new);
             std::cout<<"\nNew node added DG";
 
@@ -177,7 +177,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
         {
             print_config(q);
             q_new.setConfiguration(q);
-            q_new.setParent(&q_near);
+            q_new.setParent(q_near.getParent() + 1);
             tree->addNode(q_new);
             std::cout<<"\nNew node added DL";
             if(q == goal_config)
@@ -190,11 +190,11 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
 
 }
 
-bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
+std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
 {
     OpenRAVE::RobotBasePtr robot_pointer = env_pointer->GetRobot("PR2");
     NodeTree tree, *treeptr = &tree;
-    RRTNode start (start_config);
+    RRTNode start (start_config, 0);
 
     int threshold = 10000, i = 0;
 
@@ -226,8 +226,11 @@ bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
 
     std::cout << tree.getNodes().size();
     print_config(tree.getLastNode().getConfiguration());
-    std::vector<RRTNode*> path = getPath(treeptr);
-    return true;
+    std::vector<std::vector<double> > path = getPath(treeptr);
+
+
+
+    return path;
 
 }
 
@@ -241,21 +244,28 @@ void print_config(std::vector<double> config)
     std::cout <<"]";
 }
 
-std::vector<RRTNode*> getPath(NodeTree* tree)
+std::vector<std::vector<double> > getPath(NodeTree* tree)
 {
-    std::vector<RRTNode*> path;
-    RRTNode last = tree->getLastNode();
-    RRTNode* parent = &last;
-    int i = 0;
+    std::vector<RRTNode> nodes = tree->getNodes();
+    std::vector<std::vector<double> > path;
+    RRTNode temp;
+    int parent_count = tree->getLastNode().getParent();
+    path.push_back(tree->getLastNode().getConfiguration());
+    print_config(path[0]);
+    int j = 1;
 
-    while(parent != NULL)
+    for(int i = nodes.size()-2; i>=0; i--)
     {
-        path.push_back(parent);
-        print_config(parent->getConfiguration());
-        parent = parent->getParent();
-        i++;
+        temp = nodes[i];
+        if(temp.getParent() == parent_count - 1)
+        {
+            path.push_back(temp.getConfiguration());
+            parent_count--;
+            print_config(path[j]);
+            j++;
+        }
+
     }
 
-    reverse(path.begin(), path.end());
     return path;
 }
