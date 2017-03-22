@@ -12,7 +12,7 @@ public:
     rrtmodule(EnvironmentBasePtr penv, std::istream& ss) : ModuleBase(penv) {
         RegisterCommand("MyCommand",boost::bind(&rrtmodule::MyCommand,this,_1,_2),
                         "This is an example command");
-    RegisterCommand("RRTConnect", boost::bind(&rrtmodule::RRTConnect,this,_1,_2),
+    RegisterCommand("RRT", boost::bind(&rrtmodule::RRT,this,_1,_2),
             "This command sends info from python to c++");
     }
     virtual ~rrtmodule() {}
@@ -25,7 +25,7 @@ public:
         return true;
     }
 
-    bool RRTConnect(std::ostream& sout, std::istream& sinput)
+    bool RRT(std::ostream& sout, std::istream& sinput)
     {
         // Format in which command is received:
         // RRTConnect goal goal_bias weights
@@ -54,9 +54,12 @@ public:
         }
 
         sout << "\nGoal bias: ";
-        sinput >> input;
-        goal_bias = strtof(input.c_str(),0);
+        sinput >> goal_bias;
         sout << goal_bias;
+
+        sout << "\nStep size: ";
+        sinput >> step_size;
+        sout << step_size;
 
         sout << "\nWeights: ";
         for(int i = 0; i<7; i++)
@@ -89,16 +92,18 @@ public:
         }
 
         sout << "\nRandom Sample: \n";
-        std::vector<float> q_rand = random_sample();
+        std::vector<double> q_rand = random_sample();
         for(int i = 0; i<7; i++)
         {
             sout << q_rand[i] << " ";
         }
 
+        RRTConnect();
+        sout << "Success";
+
         return true;
     }
 };
-
 
 // called to create a new plugin
 InterfaceBasePtr CreateInterfaceValidated(InterfaceType type, const std::string& interfacename, std::istream& sinput, EnvironmentBasePtr penv)
