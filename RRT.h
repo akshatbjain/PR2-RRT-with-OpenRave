@@ -18,6 +18,7 @@
 #include <cstring> // Includes NULL
 #include <math.h>
 #include <openrave/plugin.h>
+#include <iostream>
 
 // Classes defined in this header file
 
@@ -59,14 +60,9 @@ public:
     void deleteNode(int node_index);
     std::vector<RRTNode> getNodes();
     RRTNode getLastNode();
-    std::vector<RRTNode> path();
+    //std::vector<RRTNode> path();
 
 };
-
-OpenRAVE::RobotBasePtr robot_pointer;
-OpenRAVE::EnvironmentBasePtr env_pointer;
-OpenRAVE::CollisionCheckerBasePtr check_pointer;
-OpenRAVE::RobotBase::ManipulatorPtr manip_pointer;
 
 bool biDirectional;
 std::vector<double> start_config, goal_config;
@@ -77,10 +73,9 @@ bool reached_goal;
 double euclidean_distance(std::vector<double> A, std::vector<double> B);
 RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random);
 std::vector<double> random_sample();
-bool check_collision(std::vector<double> config);
+bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
 void init_Tree();
-int extend(NodeTree tree, std::vector<double> q);
-void RRTConnect();
-
+int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
+bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 
 #endif

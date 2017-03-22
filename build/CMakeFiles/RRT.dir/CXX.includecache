@@ -19,6 +19,8 @@ math.h
 -
 openrave/plugin.h
 -
+iostream
+-
 
 /usr/local/include/openrave-0.9/openrave/collisionchecker.h
 
