@@ -77,5 +77,6 @@ bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr en
 void init_Tree();
 int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
 bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
+void print_config(std::vector<double> config);
 
 #endif

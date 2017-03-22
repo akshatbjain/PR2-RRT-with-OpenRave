@@ -119,7 +119,7 @@ std::vector<double> random_sample()
     }
     for(int i=0; i<7; i++)
     {
-        q_rand.push_back(lower_joint_limits[i] + static_cast<double> (rand()) / (static_cast<double> (RAND_MAX/(upper_joint_limits[i] - lower_joint_limits[i]))));
+        q_rand.push_back(lower_joint_limits[i] + ((static_cast<double> (rand()) / static_cast<double> (RAND_MAX)) * (upper_joint_limits[i] - lower_joint_limits[i])));
     }
     return q_rand;
 }
@@ -135,33 +135,35 @@ void init_Tree(NodeTree tree)
     tree.addNode(start_config);
 }
 
-int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer)
+int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer)
 {
     RRTNode q_near, q_new, temp_node;
     std::vector<double> temp, temp1;
     double distance;
-    std::cout << "extend" << std::endl;
-    q_near.setConfiguration(find_nearest_neighbor(tree, q).getConfiguration());
+
+    q_near.setConfiguration(find_nearest_neighbor(*tree, q).getConfiguration());
     temp1 = q_near.getConfiguration();
+
     distance = euclidean_distance(q, q_near.getConfiguration());
 
     if(distance > step_size)
     {
         for(int i = 0; i<7; i++)
         {
-            temp.push_back(step_size*(q[i]-temp1[i])/euclidean_distance(q, temp1));
+            temp.push_back(temp1[i] + (step_size*(q[i]-temp1[i])/euclidean_distance(q, temp1)));
         }
         q_new.setConfiguration(temp);
-        if(q_new.getConfiguration() == q)
-        {
-            reached_goal = 1;
-            return 0; // Reached
-        }
+
         if(!check_collision(q_new.getConfiguration(), env_pointer, robot_pointer))
         {
-            tree.addNode(q_new);
-            temp_node = tree.getLastNode();
+            tree->addNode(q_new);
+            temp_node = tree->getLastNode();
             temp_node.setParent(q_near.getParent());
+            if(q_new.getConfiguration() == q)
+            {
+                reached_goal = 1;
+                return 0; // Reached
+            }
             return 1; // Extend
         }
 
@@ -173,7 +175,7 @@ int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr en
 bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
 {
     OpenRAVE::RobotBasePtr robot_pointer = env_pointer->GetRobot("PR2");
-    NodeTree tree;
+    NodeTree tree, *treeptr = &tree;
     RRTNode start (start_config);
 
     int threshold = 10000, i = 0;
@@ -197,17 +199,29 @@ bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
         int ext = -1;
         while(ext != 2)
         {
-            ext = extend(tree,q_rand, env_pointer, robot_pointer);
-            std::cout << ext;
+            ext = extend(treeptr,q_rand, env_pointer, robot_pointer);
         }
         std::cout << std::endl;
         i++;
         if(reached_goal == 1)
         {
+            std::cout<< "Reached";
             break;
         }
     }
 
     std::cout << tree.getNodes().size();
 
+    return true;
+
+}
+
+void print_config(std::vector<double> config)
+{
+    std::cout << "\n[";
+    for(int i = 0; i<7; i++)
+    {
+        std::cout << config[i] << ", ";
+    }
+    std::cout <<"]";
 }
