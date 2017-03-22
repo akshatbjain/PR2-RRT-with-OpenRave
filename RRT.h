@@ -25,20 +25,20 @@
 class RRTNode
 {
     std::vector<double> _configuration;
-    int parent_node;
+    RRTNode* parent_node;
 
 public:
     // Constructors
     RRTNode();
     RRTNode(std::vector<double> configuration);
-    RRTNode(std::vector<double> configuration, int parent);
+    RRTNode(std::vector<double> configuration, RRTNode* parent);
 
     // Destructor
     ~RRTNode();
 
     //Functions
-    void setParent(int parent);
-    int getParent();
+    void setParent(RRTNode* parent);
+    RRTNode *getParent();
     std::vector<double> getConfiguration();
     void setConfiguration(std::vector<double> config);
 
@@ -81,6 +81,6 @@ int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr en
 bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 void print_config(std::vector<double> config);
 
-std::vector<double> getPath(NodeTree tree);
+std::vector<RRTNode *> getPath(NodeTree* tree);
 
 #endif

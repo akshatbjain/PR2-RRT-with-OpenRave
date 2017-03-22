@@ -6,16 +6,16 @@
 
 RRTNode::RRTNode()
 {
-    parent_node = 0;
+    parent_node = NULL;
 }
 
 RRTNode::RRTNode(std::vector<double> configuration)
 {
     _configuration = configuration;
-    parent_node = 0;
+    parent_node = NULL;
 }
 
-RRTNode::RRTNode(std::vector<double> configuration, int parent)
+RRTNode::RRTNode(std::vector<double> configuration, RRTNode* parent)
 {
     _configuration = configuration;
     parent_node = parent;
@@ -24,15 +24,15 @@ RRTNode::RRTNode(std::vector<double> configuration, int parent)
 RRTNode::~RRTNode()
 {
     _configuration.clear();
-    parent_node = 0;
+    parent_node = NULL;
 }
 
-void RRTNode::setParent(int parent)
+void RRTNode::setParent(RRTNode *parent)
 {
     parent_node = parent;
 }
 
-int RRTNode::getParent()
+RRTNode* RRTNode::getParent()
 {
     return parent_node;
 }
@@ -141,7 +141,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
     std::vector<double> temp, temp1;
     double distance;
 
-    q_near.setConfiguration(find_nearest_neighbor(*tree, q).getConfiguration());
+    q_near = find_nearest_neighbor(*tree, q);
     temp1 = q_near.getConfiguration();
 
     distance = euclidean_distance(q, q_near.getConfiguration());
@@ -157,7 +157,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
         {
             print_config(temp);
             q_new.setConfiguration(temp);
-            q_new.setParent(parent_count++);
+            q_new.setParent(&q_near);
             tree->addNode(q_new);
             std::cout<<"\nNew node added DG";
 
@@ -177,7 +177,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
         {
             print_config(q);
             q_new.setConfiguration(q);
-            q_new.setParent(parent_count++);
+            q_new.setParent(&q_near);
             tree->addNode(q_new);
             std::cout<<"\nNew node added DL";
             if(q == goal_config)
@@ -226,7 +226,7 @@ bool RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
 
     std::cout << tree.getNodes().size();
     print_config(tree.getLastNode().getConfiguration());
-    std::vector<double> path = getPath(tree);
+    std::vector<RRTNode*> path = getPath(treeptr);
     return true;
 
 }
@@ -241,13 +241,21 @@ void print_config(std::vector<double> config)
     std::cout <<"]";
 }
 
-std::vector<double> getPath(NodeTree tree)
+std::vector<RRTNode*> getPath(NodeTree* tree)
 {
-    std::vector<RRTNode> nodes = tree.getNodes();
-    std::vector<double> path;
-    for(int i = 0; i<nodes.size(); i++)
-    {
+    std::vector<RRTNode*> path;
+    RRTNode last = tree->getLastNode();
+    RRTNode* parent = &last;
+    int i = 0;
 
+    while(parent != NULL)
+    {
+        path.push_back(parent);
+        print_config(parent->getConfiguration());
+        parent = parent->getParent();
+        i++;
     }
+
+    reverse(path.begin(), path.end());
     return path;
 }
