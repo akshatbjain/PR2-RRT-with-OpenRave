@@ -114,7 +114,8 @@ public:
                 if(j<6)
                     sout << ",";
             }
-            sout << std::endl;
+            if(i < path.size() - 1)
+                sout << std::endl;
         }
         return true;
     }
