@@ -63,7 +63,7 @@ if __name__ == "__main__":
         # Pass 0 for RRTConnect
         # Pass 1 for biDirectional RRTConnect
         biDirectional = 0
-        command = "RRTConnect " + str(biDirectional) + " "
+        command = "RRT " + str(biDirectional) + " "
 
         startconfig = repr(startconfig).strip('[').strip(']')
         command = command + startconfig + " "
@@ -74,6 +74,10 @@ if __name__ == "__main__":
         goal_bias = 0.1
         goal_bias = repr(goal_bias)
         command = command + goal_bias + " "
+
+        step_size = 0.3
+        step_size = repr(step_size)
+        command = command + step_size + " "
 
         lmodel = databases.linkstatistics.LinkStatisticsModel(robot)
         if not lmodel.load():
@@ -91,8 +95,9 @@ if __name__ == "__main__":
         upper = repr(list(upper)).strip('[').strip(']')
         command = command + lower + " " + upper + " "
 
+        print command
         rrtmodule = RaveCreateModule(env,'rrtmodule')
-        print rrtmodule.SendCommand(command)
+        rrtmodule.SendCommand(command)
         ### END OF YOUR CODE ###
     waitrobot(robot)
 
