@@ -40,6 +40,7 @@ if __name__ == "__main__":
     ### INITIALIZE YOUR PLUGIN HERE ###
     RaveInitialize()
     RaveLoadPlugin('build/rrtplugin')
+    rrtmodule = RaveCreateModule(env,'rrtmodule')
     ### END INITIALIZING YOUR PLUGIN ###
 
 
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     tuckarms(env,robot);
 
     #set start config
-    jointnames =['l_shoulder_pan_joint','l_shoulder_lift_joint','l_upper_arm_roll_joint','l_elbow_flex_joint','l_forearm_roll_joint','l_wrist_flex_joint','l_wrist_roll_joint']
+    jointnames =['l_shoulder_pan_joint','l_shoulder_lift_joint','l_elbow_flex_joint','l_upper_arm_roll_joint','l_forearm_roll_joint','l_wrist_flex_joint','l_wrist_roll_joint']
     robot.SetActiveDOFs([robot.GetJoint(name).GetDOFIndex() for name in jointnames])
     startconfig = [-0.15,0.075,-1.008,-0.11,0,-0.11,0]
     robot.SetActiveDOFValues(startconfig);
@@ -71,7 +72,7 @@ if __name__ == "__main__":
         goalconfig = repr(goalconfig).strip('[').strip(']')
         command = command + goalconfig + " "
 
-        goal_bias = 0.1
+        goal_bias = 0.15
         goal_bias = repr(goal_bias)
         command = command + goal_bias + " "
 
@@ -96,8 +97,8 @@ if __name__ == "__main__":
         command = command + lower + " " + upper + " "
 
         print command
-        rrtmodule = RaveCreateModule(env,'rrtmodule')
-        rrtmodule.SendCommand(command)
+        print rrtmodule.SendCommand(command)
+        print rrtmodule.SendCommand("Start")
         ### END OF YOUR CODE ###
     waitrobot(robot)
 
