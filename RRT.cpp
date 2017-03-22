@@ -9,13 +9,13 @@ RRTNode::RRTNode()
     parent_node = NULL;
 }
 
-RRTNode::RRTNode(std::vector<float> configuration)
+RRTNode::RRTNode(std::vector<double> configuration)
 {
     _configuration = configuration;
     parent_node = NULL;
 }
 
-RRTNode::RRTNode(std::vector<float> configuration, RRTNode *parent)
+RRTNode::RRTNode(std::vector<double> configuration, RRTNode *parent)
 {
     _configuration = configuration;
     parent_node = parent;
@@ -37,9 +37,14 @@ RRTNode* RRTNode::getParent()
     return parent_node;
 }
 
-std::vector<float> RRTNode::getConfiguration()
+std::vector<double> RRTNode::getConfiguration()
 {
     return _configuration;
+}
+
+void RRTNode::setConfiguration(std::vector<double> config)
+{
+    _configuration = config;
 }
 
 // ******************************************************************************* //
@@ -70,30 +75,36 @@ std::vector<RRTNode> NodeTree::getNodes()
     return _nodes;
 }
 
+RRTNode NodeTree::getLastNode()
+{
+    return _nodes.back();
+}
+
 std::vector<RRTNode> NodeTree::path()
 {
 
 }
 
-float NodeTree::euclidean_distance(std::vector<float> A, std::vector<float> B)
+double euclidean_distance(std::vector<double> A, std::vector<double> B)
 {
-    float sum = 0.0;
+    double sum = 0.0;
     for(int i = 0; i<7; i++)
     {
-        sum = sum + pow(DOFWeights[i]*(A[i] - B[i]),2);
+        sum = sum + pow(joint_weights[i]*(A[i] - B[i]),2);
     }
 
     return sqrt(sum);
 }
 
-RRTNode NodeTree::find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<float> q_random)
+RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random)
 {
-    float distance, minimum_distance = -1;
+    double distance, minimum_distance = -1;
     int node_index;
+    std::vector<RRTNode> nodes = tree.getNodes();
 
-    for(int i = 0; i<int(tree.size()); i++)
+    for(int i = 0; i<int(nodes.size()); i++)
     {
-        distance = euclidean_distance(tree[i].getConfiguration(), q_random);
+        distance = euclidean_distance(nodes[i].getConfiguration(), q_random);
         if(distance < minimum_distance || minimum_distance == -1)
         {
             minimum_distance = distance;
@@ -101,15 +112,84 @@ RRTNode NodeTree::find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<f
         }
     }
 
-    return tree[node_index];
+    return nodes[node_index];
 }
 
-std::vector<float> random_sample()
+std::vector<double> random_sample()
 {
-    std::vector<float> q_rand;
+    std::vector<double> q_rand;
+    srand(time(NULL));
     for(int i=0; i<7; i++)
     {
-        q_rand.push_back(lower_joint_limits[i] + static_cast<float> (rand()) / (static_cast<float> (RAND_MAX/(upper_joint_limits[i] - lower_joint_limits[i]))));
+        q_rand.push_back(lower_joint_limits[i] + static_cast<double> (rand()) / (static_cast<double> (RAND_MAX/(upper_joint_limits[i] - lower_joint_limits[i]))));
     }
     return q_rand;
+}
+
+bool check_collision(std::vector<double> config)
+{
+    robot_pointer->SetActiveDOFValues(config);
+    return env_pointer->CheckCollision(robot_pointer) || robot_pointer->CheckSelfCollision();
+}
+
+void init_Tree(NodeTree tree)
+{
+    tree.addNode(start_config);
+}
+
+int extend(NodeTree tree, std::vector<double> q)
+{
+    RRTNode q_near, q_new, temp_node;
+    std::vector<double> temp, temp1;
+    double distance;
+
+    q_near.setConfiguration(find_nearest_neighbor(tree, q).getConfiguration());
+    temp1 = q_near.getConfiguration();
+    distance = euclidean_distance(q, q_near.getConfiguration());
+
+    if(distance > step_size)
+    {
+        for(int i = 0; i<7; i++)
+        {
+            temp.push_back(step_size*(q[i]-temp1[i])/euclidean_distance(q, temp1));
+        }
+        q_new.setConfiguration(temp);
+        if(q_new.getConfiguration() == q)
+        {
+            reached_goal = 1;
+            return 0; // Reached
+        }
+        if(!check_collision(q_new.getConfiguration()))
+        {
+            tree.addNode(q_new);
+            temp_node = tree.getLastNode();
+            temp_node.setParent(q_near.getParent());
+            return 1; // Extend
+        }
+
+    }
+    return 2; // Trapped
+
+}
+
+void RRTConnect()
+{
+    robot_pointer = env_pointer->GetRobot("PR2");
+
+    NodeTree tree;
+    init_Tree(tree);
+
+    reached_goal = 0;
+
+    std::vector<double> q_rand;
+
+    while(reached_goal == 0)
+    {
+        q_rand = random_sample();
+        while(extend(tree,q_rand) != 2)
+        {
+
+        }
+
+    }
 }

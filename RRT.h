@@ -23,14 +23,14 @@
 
 class RRTNode
 {
-    std::vector<float> _configuration;
+    std::vector<double> _configuration;
     RRTNode* parent_node;
 
 public:
     // Constructors
     RRTNode();
-    RRTNode(std::vector<float> configuration);
-    RRTNode(std::vector<float> configuration, RRTNode* parent);
+    RRTNode(std::vector<double> configuration);
+    RRTNode(std::vector<double> configuration, RRTNode* parent);
 
     // Destructor
     ~RRTNode();
@@ -38,14 +38,14 @@ public:
     //Functions
     void setParent(RRTNode* parent);
     RRTNode* getParent();
-    std::vector<float> getConfiguration();
+    std::vector<double> getConfiguration();
+    void setConfiguration(std::vector<double> config);
 
 };
 
 class NodeTree
 {
     std::vector<RRTNode> _nodes;
-    std::vector<float> DOFWeights;
 
 public:
     // Constructor
@@ -58,18 +58,29 @@ public:
     void addNode(RRTNode node);
     void deleteNode(int node_index);
     std::vector<RRTNode> getNodes();
+    RRTNode getLastNode();
     std::vector<RRTNode> path();
-    float euclidean_distance(std::vector<float> A, std::vector<float> B);
-    RRTNode find_nearest_neighbor(std::vector<RRTNode> tree, std::vector<float> q_random);
 
 };
 
-int biDirectional;
-std::vector<float> start_config, goal_config;
-float goal_bias, joint_weights[7];
-std::vector<float> lower_joint_limits, upper_joint_limits;
-std::vector<float> random_sample();
+OpenRAVE::RobotBasePtr robot_pointer;
+OpenRAVE::EnvironmentBasePtr env_pointer;
+OpenRAVE::CollisionCheckerBasePtr check_pointer;
+OpenRAVE::RobotBase::ManipulatorPtr manip_pointer;
+
+bool biDirectional;
+std::vector<double> start_config, goal_config;
+double goal_bias, step_size, joint_weights[7];
+std::vector<double> lower_joint_limits, upper_joint_limits;
+bool reached_goal;
+
+double euclidean_distance(std::vector<double> A, std::vector<double> B);
+RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random);
+std::vector<double> random_sample();
+bool check_collision(std::vector<double> config);
 void init_Tree();
+int extend(NodeTree tree, std::vector<double> q);
+void RRTConnect();
 
 
 #endif
