@@ -5,7 +5,7 @@ import time
 import openravepy
 
 #### YOUR IMPORTS GO HERE ####
-
+draw=[]
 #### END OF YOUR IMPORTS ####
 
 if not __openravepy_build_doc__:
@@ -24,6 +24,23 @@ def tuckarms(env,robot):
         robot.SetActiveDOFValues([1.29023451,-2.32099996,-0.69800004,1.27843491,-2.32100002,-0.69799996]);
         robot.GetController().SetDesired(robot.GetDOFValues());
     waitrobot(robot)
+
+def split_and_reverse_path(path):
+    path = path.split('\n')
+    for i in xrange(len(path)):
+        path[i] = path[i].split(',')
+        for j in xrange(len(path[i])):
+            path[i][j] = float(path[i][j])
+    new_path = path
+    for i in range(len(path)):
+        new_path[len(path) - i - 1] = path[i]
+    path = new_path
+    return path
+
+def draw_path(path):
+    for i in path:
+        robot.SetActiveDOFValues(i)
+        draw.append(env.plot3(points=robot.GetLinks()[49].GetTransform()[0:3,3],pointsize=0.03,colors=[1, 0, 0],drawstyle=1))
 
 if __name__ == "__main__":
 
@@ -102,16 +119,18 @@ if __name__ == "__main__":
         path = rrtmodule.SendCommand("Start")
         print("--- %s seconds ---" % (time.time() - start_time))
 
-        path = path.split('\n')
-        for i in xrange(len(path)):
-            path[i] = path[i].split(',')
-            for j in xrange(len(path[i])):
-                path[i][j] = float(path[i][j])
+        path = split_and_reverse_path(path)
 
-        draw=[]
-        for i in path:
-            robot.SetActiveDOFValues(i)
-            draw.append(env.plot3(points=robot.GetLinks()[49].GetTransform()[0:3,3],pointsize=0.03,colors=[1, 0, 0],drawstyle=1))
+        draw_path(path)
+
+        trajectory = RaveCreateTrajectory(env,'')
+        trajectory.Init(robot.GetActiveConfigurationSpecification())
+        for i in xrange(len(path)):
+			trajectory.Insert(i,path[i])
+        planningutils.RetimeActiveDOFTrajectory(trajectory,robot,hastimestamps=False,maxvelmult=1,maxaccelmult=1)
+        print 'Duration of trajectory =',trajectory.GetDuration()
+
+        robot.GetController().SetPath(trajectory)
 
         ### END OF YOUR CODE ###
     waitrobot(robot)
