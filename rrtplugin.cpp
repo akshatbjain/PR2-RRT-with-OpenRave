@@ -10,10 +10,12 @@ class rrtmodule : public ModuleBase
 {
 public:
     rrtmodule(EnvironmentBasePtr penv, std::istream& ss) : ModuleBase(penv) {
-        RegisterCommand("MyCommand",boost::bind(&rrtmodule::MyCommand,this,_1,_2),
+    RegisterCommand("MyCommand",boost::bind(&rrtmodule::MyCommand,this,_1,_2),
                         "This is an example command");
     RegisterCommand("RRT", boost::bind(&rrtmodule::RRT,this,_1,_2),
             "This command sends info from python to c++");
+    RegisterCommand("Start",boost::bind(&rrtmodule::Start,this,_1,_2),
+                    "TP");
     }
     virtual ~rrtmodule() {}
     
@@ -98,9 +100,12 @@ public:
             sout << q_rand[i] << " ";
         }
 
-        RRTConnect();
-        sout << "Success";
+        return true;
+    }
 
+    bool Start(std::ostream& sout, std::istream& sinput)
+    {
+        sout << RRTConnect(GetEnv());
         return true;
     }
 };
