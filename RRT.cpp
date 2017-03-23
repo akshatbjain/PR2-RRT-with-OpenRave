@@ -80,6 +80,10 @@ RRTNode NodeTree::getLastNode()
     return _nodes.back();
 }
 
+// ******************************************************************************* //
+// Functions
+// ******************************************************************************* //
+
 double euclidean_distance(std::vector<double> A, std::vector<double> B)
 {
     double sum = 0.0;
@@ -206,7 +210,7 @@ std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_po
 
     srand(time(0));
 
-    while((reached_goal == 0) && (i < threshold))
+    while(reached_goal == 0) // && (i < threshold))
     {
         q_rand = random_sample();
         //std::cout << "\nNew sample. Loop number: "<< i;
@@ -216,7 +220,7 @@ std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_po
             ext = extend(treeptr,q_rand, env_pointer, robot_pointer);
         }
         //std::cout << std::endl;
-        if(i%100 == 0)
+        if(i%1000 == 0)
             std::cout << i << "\n";
 
         i++;
@@ -269,6 +273,6 @@ std::vector<std::vector<double> > getPath(NodeTree* tree)
         }
 
     }
-
+    reverse(path.begin(), path.end());
     return path;
 }

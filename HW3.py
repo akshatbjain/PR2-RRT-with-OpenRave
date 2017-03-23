@@ -25,16 +25,12 @@ def tuckarms(env,robot):
         robot.GetController().SetDesired(robot.GetDOFValues());
     waitrobot(robot)
 
-def split_and_reverse_path(path):
+def split_path(path):
     path = path.split('\n')
     for i in xrange(len(path)):
         path[i] = path[i].split(',')
         for j in xrange(len(path[i])):
             path[i][j] = float(path[i][j])
-    new_path = path
-    for i in range(len(path)):
-        new_path[len(path) - i - 1] = path[i]
-    path = new_path
     return path
 
 def draw_path(path):
@@ -93,7 +89,7 @@ if __name__ == "__main__":
         goal_bias = repr(goal_bias)
         command = command + goal_bias + " "
 
-        step_size = 0.3
+        step_size = 0.2
         step_size = repr(step_size)
         command = command + step_size + " "
 
@@ -117,9 +113,9 @@ if __name__ == "__main__":
 
         start_time = time.time()
         path = rrtmodule.SendCommand("Start")
-        print("--- %s seconds ---" % (time.time() - start_time))
+        print("Time taken to compute path: %s seconds" % (time.time() - start_time))
 
-        path = split_and_reverse_path(path)
+        path = split_path(path)
 
         draw_path(path)
 
