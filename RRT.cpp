@@ -332,9 +332,9 @@ std::vector<std::vector<double> > getPath(NodeTree* tree)
 //        }
 
 //    }
-    std::cout<<"\nReversing now";
+    //std::cout<<"\nReversing now";
     reverse(path.begin(), path.end());
-    std::cout<<"\nReversing done";
+    //std::cout<<"\nReversing done";
     return path;
 }
 
@@ -346,7 +346,7 @@ bool connect_smooth(std::vector<double> a, std::vector<double> b, OpenRAVE::Envi
         //std::cout<<"In loop";
         for(int i = 0; i<7; i++)
         {
-            a[i] = a[i] + (step_size*(a[i]-b[i])/weighted_distance(a,b));
+            a[i] = a[i] + (step_size*(b[i]-a[i])/weighted_distance(a,b));
         }
         if(!in_limits(a))
             return false;
@@ -363,15 +363,13 @@ std::vector<std::vector<double> > smooth_path(std::vector<std::vector<double> > 
     std::vector<double> temp1, temp2;
     int length;
 
+
     for(int k = 0; k<200; k++)
     {
         //std::cout<<k<<"\n";
         length = path.size();
-
-        if(length<10)
-            break;
-
         int element1 = 0, element2 = 0;
+
         while(abs(element1 - element2) <= 1)
         {
             element1 = rand() % length;
@@ -463,28 +461,28 @@ std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_
     std::vector<std::vector<double> > pathB = getPath(treeptr2);
     reverse(pathB.begin(), pathB.end());
 
-    std::cout<<"\nPath A\n";
-    for(int i = 0; i<int(pathA.size()); i++)
-    {
-        for(int j = 0; j<7; j++)
-        {
-            std::cout<<pathA[i][j];
-            if(j<6)
-                std::cout<<",";
-        }
-        std::cout<<std::endl;
-    }
-    std::cout<<"\nPath B\n";
+    //std::cout<<"\nPath A\n";
+//    for(int i = 0; i<int(pathA.size()); i++)
+//    {
+//        for(int j = 0; j<7; j++)
+//        {
+//            std::cout<<pathA[i][j];
+//            if(j<6)
+//                std::cout<<",";
+//        }
+//        std::cout<<std::endl;
+//    }
+//    std::cout<<"\nPath B\n";
     for(int i = 1; i<int(pathB.size()); i++)
     {
         pathA.push_back(pathB[i]);
-        for(int j = 0; j<7; j++)
-        {
-            std::cout<<pathB[i][j];
-            if(j<6)
-                std::cout<<",";
-        }
-        std::cout<<std::endl;
+//        for(int j = 0; j<7; j++)
+//        {
+//            std::cout<<pathB[i][j];
+//            if(j<6)
+//                std::cout<<",";
+//        }
+//        std::cout<<std::endl;
     }
     return pathA;
 }
