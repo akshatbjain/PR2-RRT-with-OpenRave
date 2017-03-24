@@ -71,7 +71,7 @@ std::vector<double> start_config, goal_config;
 double goal_bias, step_size, joint_weights[7];
 std::vector<double> lower_joint_limits, upper_joint_limits;
 bool reached_goal;
-int node_counter, node_counterA, node_counterB;
+int node_counter=-1, node_counterA=-2, node_counterB=-3;
 
 double euclidean_distance(std::vector<double> A, std::vector<double> B);
 double weighted_distance(std::vector<double> A, std::vector<double> B);
@@ -79,7 +79,7 @@ RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random);
 std::vector<double> random_sample();
 bool in_limits(std::vector<double> a);
 bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
-int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
+int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer, int node_cnt);
 std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 void print_config(std::vector<double> config);
 std::vector<std::vector<double> > getPath(NodeTree* tree);

@@ -134,7 +134,7 @@ RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random)
 std::vector<double> random_sample()
 {
     std::vector<double> q_rand;
-    if (rand() / double(RAND_MAX) < goal_bias)
+    if ((rand() / double(RAND_MAX) < goal_bias) && (biDirectional == 0))
     {
         return goal_config;
     }
@@ -161,7 +161,7 @@ bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr en
     return env_pointer->CheckCollision(robot_pointer) || robot_pointer->CheckSelfCollision();
 }
 
-int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer)
+int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer, int node_cnt)
 {
     RRTNode q_near, q_new, temp_node;
     std::vector<double> temp, temp1;
@@ -181,8 +181,14 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
 
         if((!check_collision(temp, env_pointer, robot_pointer)) && in_limits(temp))
         {
+            if(node_cnt == node_counter)
+                ++node_counter;
+            else if(node_cnt == node_counterA)
+                ++node_counterA;
+            else if(node_cnt == node_counterB)
+                ++node_counterB;
             //print_config(temp);
-            ++node_counter;
+            ++node_cnt;
             q_new.setConfiguration(temp);
             q_new.setParent(q_near.getSelf());
             q_new.setSelf(node_counter);
@@ -191,7 +197,7 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
 
             if(temp == q)
             {
-                if(q == goal_config)
+                if((q == goal_config)&&(biDirectional == 0))
                     reached_goal = 1;
                 return 0; // Reached
             }
@@ -203,14 +209,20 @@ int extend(NodeTree* tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr e
     {
         if((!check_collision(q, env_pointer, robot_pointer)) && in_limits(q))
         {
+            if(node_cnt == node_counter)
+                ++node_counter;
+            else if(node_cnt == node_counterA)
+                ++node_counterA;
+            else if(node_cnt == node_counterB)
+                ++node_counterB;
             //print_config(q);
-            ++node_counter;
+            ++node_cnt;
             q_new.setConfiguration(q);
             q_new.setParent(q_near.getSelf());
             q_new.setSelf(node_counter);
             tree->addNode(q_new);
             //std::cout<<"\nNew node added DL";
-            if(q == goal_config)
+            if((q == goal_config)&&(biDirectional == 0))
                 reached_goal = 1;
             return 0;
 
@@ -244,7 +256,7 @@ std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_po
         int ext = 1;
         while(ext == 1)
         {
-            ext = extend(treeptr,q_rand, env_pointer, robot_pointer);
+            ext = extend(treeptr,q_rand, env_pointer, robot_pointer, node_counter);
         }
         //std::cout << std::endl;
         if(i%1000 == 0)
@@ -404,20 +416,24 @@ std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_
 
     srand(time(0));
 
-    while(reached_goal != 0)
+    while(reached_goal == 0)
     {
         q_rand = random_sample();
+        //std::cout<<"\nRandom Sample";
+        //print_config(q_rand);
 
         ext = 1;
         while (ext == 1)
         {
-            ext = extend(treeptr1, q_rand, env_pointer, robot_pointer);
+            ext = extend(treeptr1, q_rand, env_pointer, robot_pointer, node_counterA);
         }
         q_rand = treeA.getLastNode().getConfiguration();
+        //std::cout<<"\nFirst tree last node to second tree random config";
+        //print_config(q_rand);
         ext = 1;
         while (ext == 1)
         {
-            ext = extend(treeptr2, q_rand, env_pointer, robot_pointer);
+            ext = extend(treeptr2, q_rand, env_pointer, robot_pointer, node_counterB);
         }
         if(treeA.getLastNode().getConfiguration() == treeB.getLastNode().getConfiguration())
         {
@@ -426,12 +442,15 @@ std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_
         }
         else
         {
-            *temp_ptr = *treeptr1;
-            *treeptr1 = *treeptr2;
-            *treeptr2 = *temp_ptr;
+            temp_ptr = treeptr1;
+            treeptr1 = treeptr2;
+            treeptr2 = temp_ptr;
+            node_counter = node_counterA;
+            node_counterA = node_counterB;
+            node_counterB = node_counter;
         }
 
-        if(i%100 == 0)
+        if(i%1000 == 0)
             std::cout<<i<<"\n";
         ++i;
 
@@ -444,6 +463,7 @@ std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_
     std::vector<std::vector<double> > pathB = getPath(treeptr2);
     reverse(pathB.begin(), pathB.end());
 
+    std::cout<<"\nPath A\n";
     for(int i = 0; i<int(pathA.size()); i++)
     {
         for(int j = 0; j<7; j++)
@@ -454,11 +474,13 @@ std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_
         }
         std::cout<<std::endl;
     }
-    for(int i = 0; i<int(pathA.size()); i++)
+    std::cout<<"\nPath B\n";
+    for(int i = 1; i<int(pathB.size()); i++)
     {
+        pathA.push_back(pathB[i]);
         for(int j = 0; j<7; j++)
         {
-            std::cout<<pathA[i][j];
+            std::cout<<pathB[i][j];
             if(j<6)
                 std::cout<<",";
         }
