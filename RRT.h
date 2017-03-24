@@ -71,7 +71,7 @@ std::vector<double> start_config, goal_config;
 double goal_bias, step_size, joint_weights[7];
 std::vector<double> lower_joint_limits, upper_joint_limits;
 bool reached_goal;
-int node_counter;
+int node_counter, node_counterA, node_counterB;
 
 double euclidean_distance(std::vector<double> A, std::vector<double> B);
 double weighted_distance(std::vector<double> A, std::vector<double> B);
@@ -85,4 +85,5 @@ void print_config(std::vector<double> config);
 std::vector<std::vector<double> > getPath(NodeTree* tree);
 bool connect_smooth(std::vector<double> a, std::vector<double> b, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
 std::vector<std::vector<double> > smooth_path(std::vector<std::vector<double> > path, OpenRAVE::EnvironmentBasePtr env_pointer);
+std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 #endif

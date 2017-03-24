@@ -108,8 +108,8 @@ if __name__ == "__main__":
         command = command + weights + " "
 
         lower, upper = robot.GetActiveDOFLimits()
-        lower[4], lower[6] = -0, -0
-        upper[4], upper[6] = 0, 0
+        lower[4], lower[6] = 0,0
+        upper[4], upper[6] = 0,0
         lower = repr(list(lower)).strip('[').strip(']')
         upper = repr(list(upper)).strip('[').strip(']')
         command = command + lower + " " + upper + " "

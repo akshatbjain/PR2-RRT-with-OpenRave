@@ -108,7 +108,18 @@ public:
     std::vector<std::vector<double> > path;
     bool Start(std::ostream& sout, std::istream& sinput)
     {
-        path = RRTConnect(GetEnv());
+        if(biDirectional == 0)
+        {
+            path = RRTConnect(GetEnv());
+            std::cout<<"\nRRTConnect";
+        }
+        else if(biDirectional == 1)
+        {
+            path = BiRRTConnect(GetEnv());
+            std::cout<<"\nBiRRTConnect";
+        }
+
+
         for(int i = 0; i<int(path.size()); i++)
         {
             for(int j = 0; j<7; j++)

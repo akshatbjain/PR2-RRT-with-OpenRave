@@ -384,3 +384,85 @@ std::vector<std::vector<double> > smooth_path(std::vector<std::vector<double> > 
     }
     return path;
 }
+
+std::vector<std::vector<double> > BiRRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer)
+{
+    OpenRAVE::RobotBasePtr robot_pointer = env_pointer->GetRobot("PR2");
+    NodeTree treeA, treeB, *treeptr1 = &treeA, *treeptr2 = &treeB, *temp_ptr;
+    RRTNode start (start_config, 0, -1);
+    RRTNode goal (goal_config, 0, -1);
+    node_counterA = 0;
+    node_counterB = 0;
+    int i = 0, ext;
+
+    treeA.addNode(start);
+    treeB.addNode(goal);
+
+    reached_goal = 0;
+
+    std::vector<double> q_rand;
+
+    srand(time(0));
+
+    while(reached_goal != 0)
+    {
+        q_rand = random_sample();
+
+        ext = 1;
+        while (ext == 1)
+        {
+            ext = extend(treeptr1, q_rand, env_pointer, robot_pointer);
+        }
+        q_rand = treeA.getLastNode().getConfiguration();
+        ext = 1;
+        while (ext == 1)
+        {
+            ext = extend(treeptr2, q_rand, env_pointer, robot_pointer);
+        }
+        if(treeA.getLastNode().getConfiguration() == treeB.getLastNode().getConfiguration())
+        {
+            reached_goal = 1;
+            break;
+        }
+        else
+        {
+            *temp_ptr = *treeptr1;
+            *treeptr1 = *treeptr2;
+            *treeptr2 = *temp_ptr;
+        }
+
+        if(i%100 == 0)
+            std::cout<<i<<"\n";
+        ++i;
+
+    }
+
+    *treeptr1 = treeA;
+    *treeptr2 = treeB;
+
+    std::vector<std::vector<double> > pathA = getPath(treeptr1);
+    std::vector<std::vector<double> > pathB = getPath(treeptr2);
+    reverse(pathB.begin(), pathB.end());
+
+    for(int i = 0; i<int(pathA.size()); i++)
+    {
+        for(int j = 0; j<7; j++)
+        {
+            std::cout<<pathA[i][j];
+            if(j<6)
+                std::cout<<",";
+        }
+        std::cout<<std::endl;
+    }
+    for(int i = 0; i<int(pathA.size()); i++)
+    {
+        for(int j = 0; j<7; j++)
+        {
+            std::cout<<pathA[i][j];
+            if(j<6)
+                std::cout<<",";
+        }
+        std::cout<<std::endl;
+    }
+    return pathA;
+}
