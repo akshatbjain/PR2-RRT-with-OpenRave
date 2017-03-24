@@ -33,10 +33,10 @@ def split_path(path):
             path[i][j] = float(path[i][j])
     return path
 
-def draw_path(path):
+def draw_path(path, color):
     for i in path:
         robot.SetActiveDOFValues(i)
-        draw.append(env.plot3(points=robot.GetLinks()[49].GetTransform()[0:3,3],pointsize=0.03,colors=[1, 0, 0],drawstyle=1))
+        draw.append(env.plot3(points=robot.GetLinks()[49].GetTransform()[0:3,3],pointsize=0.02,colors=color,drawstyle=1))
 
 if __name__ == "__main__":
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     tuckarms(env,robot);
 
     #set start config
-    jointnames =['l_shoulder_pan_joint','l_shoulder_lift_joint','l_elbow_flex_joint','l_upper_arm_roll_joint','l_forearm_roll_joint','l_wrist_flex_joint','l_wrist_roll_joint']
+    jointnames =['l_shoulder_pan_joint','l_shoulder_lift_joint','l_elbow_flex_joint','l_wrist_flex_joint','l_forearm_roll_joint','l_wrist_flex_joint','l_wrist_roll_joint']
     robot.SetActiveDOFs([robot.GetJoint(name).GetDOFIndex() for name in jointnames])
     startconfig = [-0.15,0.075,-1.008,-0.11,0,-0.11,0]
     robot.SetActiveDOFValues(startconfig);
@@ -76,6 +76,10 @@ if __name__ == "__main__":
         # biDirectional decides whether to implement RRTConnect or biDirectional RRTConnect
         # Pass 0 for RRTConnect
         # Pass 1 for biDirectional RRTConnect
+        #file = open("Testfile.txt", "w")
+        #for i in range(1,101,5):
+        #file.write("Goal Bias: " + str(i/100.0) + "\n")
+        #file.flush()
         biDirectional = 0
         command = "RRT " + str(biDirectional) + " "
 
@@ -85,11 +89,12 @@ if __name__ == "__main__":
         goalconfig = repr(goalconfig).strip('[').strip(']')
         command = command + goalconfig + " "
 
+        #goal_bias = i/100.0
         goal_bias = 0.15
         goal_bias = repr(goal_bias)
         command = command + goal_bias + " "
 
-        step_size = 0.2
+        step_size = 0.3
         step_size = repr(step_size)
         command = command + step_size + " "
 
@@ -103,31 +108,42 @@ if __name__ == "__main__":
         command = command + weights + " "
 
         lower, upper = robot.GetActiveDOFLimits()
-        lower[4], lower[6] = -pi, -pi
-        upper[4], upper[6] = pi, pi
+        lower[4], lower[6] = -0, -0
+        upper[4], upper[6] = 0, 0
         lower = repr(list(lower)).strip('[').strip(']')
         upper = repr(list(upper)).strip('[').strip(']')
         command = command + lower + " " + upper + " "
 
         print rrtmodule.SendCommand(command)
 
+        #for j in range(10):
         start_time = time.time()
         path = rrtmodule.SendCommand("Start")
         print("Time taken to compute path: %s seconds" % (time.time() - start_time))
-
+        #file.write("Run " + str(j) + ": " + str(time.time() - start_time) + "\n")
+        #file.flush()
+        #file.close()
         path = split_path(path)
 
-        draw_path(path)
+        draw_path(path, [1, 0, 0])
+
+        start_time = time.time()
+        smooth_path = rrtmodule.SendCommand("Smooth")
+        print("Time taken to smoothen path: %s seconds" % (time.time() - start_time))
+
+        smooth_path = split_path(smooth_path)
+        draw_path(smooth_path, [0, 0, 1])
+
+        a = raw_input("Enter 1")
 
         trajectory = RaveCreateTrajectory(env,'')
         trajectory.Init(robot.GetActiveConfigurationSpecification())
-        for i in xrange(len(path)):
-			trajectory.Insert(i,path[i])
+        for i in xrange(len(smooth_path)):
+    		trajectory.Insert(i,smooth_path[i])
         planningutils.RetimeActiveDOFTrajectory(trajectory,robot,hastimestamps=False,maxvelmult=1,maxaccelmult=1)
         print 'Duration of trajectory =',trajectory.GetDuration()
 
         robot.GetController().SetPath(trajectory)
-
         ### END OF YOUR CODE ###
     waitrobot(robot)
 
