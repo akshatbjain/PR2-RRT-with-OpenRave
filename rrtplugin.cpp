@@ -16,6 +16,8 @@ public:
             "This command sends info from python to c++");
     RegisterCommand("Start",boost::bind(&rrtmodule::Start,this,_1,_2),
                     "TP");
+    RegisterCommand("Smooth", boost::bind(&rrtmodule::Smooth,this,_1,_2),
+                    "Smoothen the path");
     }
     virtual ~rrtmodule() {}
     
@@ -103,10 +105,11 @@ public:
         return true;
     }
 
+    std::vector<std::vector<double> > path;
     bool Start(std::ostream& sout, std::istream& sinput)
     {
-        std::vector<std::vector<double> > path = RRTConnect(GetEnv());
-        for(int i = 0; i<path.size(); i++)
+        path = RRTConnect(GetEnv());
+        for(int i = 0; i<int(path.size()); i++)
         {
             for(int j = 0; j<7; j++)
             {
@@ -114,9 +117,28 @@ public:
                 if(j<6)
                     sout << ",";
             }
-            if(i < path.size() - 1)
+            if(i < int(path.size()) - 1)
                 sout << std::endl;
         }
+        std::cout<<"\nUnsmoothed path: "<<path.size();
+        return true;
+    }
+
+    bool Smooth(std::ostream& sout, std::istream& sinput)
+    {
+        std::vector<std::vector<double> > smoothed_path = smooth_path(path, GetEnv());
+        for(int i = 0; i<int(smoothed_path.size()); i++)
+        {
+            for(int j = 0; j<7; j++)
+            {
+                sout << smoothed_path[i][j];
+                if(j<6)
+                    sout << ",";
+            }
+            if(i < int(smoothed_path.size()) - 1)
+                sout << std::endl;
+        }
+        std::cout<<"\nSmoothed path: "<<smoothed_path.size();
         return true;
     }
 };
