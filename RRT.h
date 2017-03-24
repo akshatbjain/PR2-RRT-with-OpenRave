@@ -26,19 +26,21 @@ class RRTNode
 {
     std::vector<double> _configuration;
     int parent_node;
+    int _self;
 
 public:
     // Constructors
     RRTNode();
-    RRTNode(std::vector<double> configuration);
-    RRTNode(std::vector<double> configuration, int parent);
+    RRTNode(std::vector<double> configuration, int parent, int self);
 
     // Destructor
     ~RRTNode();
 
     //Functions
     void setParent(int parent);
+    void setSelf(int self);
     int getParent();
+    int getSelf();
     std::vector<double> getConfiguration();
     void setConfiguration(std::vector<double> config);
 
@@ -69,16 +71,18 @@ std::vector<double> start_config, goal_config;
 double goal_bias, step_size, joint_weights[7];
 std::vector<double> lower_joint_limits, upper_joint_limits;
 bool reached_goal;
+int node_counter;
 
 double euclidean_distance(std::vector<double> A, std::vector<double> B);
+double weighted_distance(std::vector<double> A, std::vector<double> B);
 RRTNode find_nearest_neighbor(NodeTree tree, std::vector<double> q_random);
 std::vector<double> random_sample();
+bool in_limits(std::vector<double> a);
 bool check_collision(std::vector<double> config, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
-void init_Tree();
 int extend(NodeTree tree, std::vector<double> q, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
 std::vector<std::vector<double> > RRTConnect(OpenRAVE::EnvironmentBasePtr env_pointer);
 void print_config(std::vector<double> config);
-
 std::vector<std::vector<double> > getPath(NodeTree* tree);
-
+bool connect_smooth(std::vector<double> a, std::vector<double> b, OpenRAVE::EnvironmentBasePtr env_pointer, OpenRAVE::RobotBasePtr robot_pointer);
+std::vector<std::vector<double> > smooth_path(std::vector<std::vector<double> > path, OpenRAVE::EnvironmentBasePtr env_pointer);
 #endif
